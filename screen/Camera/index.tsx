@@ -35,7 +35,6 @@ export default ({route}:IProps):React.ReactElement => {
       formData,
       uri,
       id: breakageId
-      //index
     });
     goBack();
   }

@@ -17,13 +17,13 @@ const loadingPlugin:Plugin = createLoadingPlugin(options)
 import common, { Common as CommonState } from './models/common';
 import user, { User as UserState } from './models/user';
 import inspection, { Inspection as InspectionState } from './models/inspection';
-//import history from './models/history';
+import history, { History as HistoryState } from './models/history';
 
 const models = {
   common,
   user,
   inspection,
- // history
+  history
 }
 
 export type RootModels = typeof models;
@@ -42,7 +42,7 @@ export type RootState = {
   common: CommonState;
   user: UserState;
   inspection: InspectionState;
-  //history: HistoryState;
+  history: HistoryState;
   loading: LoadingState<RootModels>
 }
 

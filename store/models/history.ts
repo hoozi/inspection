@@ -1,66 +1,29 @@
-import { stringify } from 'qs';
 import { ModelEffects, ModelReducers } from '@rematch/core';
-import request from '../../shared/request';
-import { TApi } from './api.type';
+import { PostAndPutModel } from './inspection';
+import { queryHistory } from '../../api/history';
 
-export interface IData {
-  ctnApply: ICtnApply;
-  ctnRepairParamsList: Array<IBreakage>;
-  [key:string]: any
-}
+export interface HistoryData extends PostAndPutModel {}
 
-export interface ICtnApply {
-  id?:number;
-  ctnNo:string;
-  ctnOwner:string;
-  numberPlate: string;
-  eir: string;
-  normalFlag: string;
-  ctnSizeType:string;
-  repairFee: number;
-}
-
-export interface IBreakage {
-  id?:number;
-  componentCname: string;
-  repairName: string;
-  length: number;
-  width:number;
-  customerRate:number;
-  photos: Array<string>;
-  [key:string]: any;
-}
-
-interface IGetCheckParams {
-
-}
-
-interface IHistoryPayload {
+interface HistoryPayload {
   callback?():void;
 }
 
-interface IState {
-  data: Array<IData>
+export interface History {
+  data: Array<HistoryData>
 }
 
-const api:TApi = {
-  async queryCheck(params: IGetCheckParams) {
-    return request(`/yms/ctn-apply/getCheck?${params}`, { onlyData: true });
-  }
-}
-
-const state:IState = {
+const state:History = {
   data:[]
 }
-const reducers:ModelReducers<IState> = {
+const reducers:ModelReducers<History> = {
   save(state, payload) {
     return Object.assign(state, payload)
   }
 }
-const effects:ModelEffects<IState> = {
-  async fetchCheck(payload:IHistoryPayload) {
+const effects:ModelEffects<History> = {
+  async fetchHistory(payload:HistoryPayload) {
     const { callback, ...restPayload } = payload??{};
-    const response = await api.queryCheck<IData>(restPayload);
+    const response = await queryHistory<HistoryData>(restPayload);
     if(response) {
       this.save({data:response});
       callback && callback();

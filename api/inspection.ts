@@ -6,7 +6,7 @@ interface GetRateParams {
   shipownerCode: string;
 }
 
-export async function postExamine<T>(body:PostAndPutModel, type:string = 'add') {
+export async function postInspection<T>(body:PostAndPutModel, type:string = 'add') {
   return request<T>(`/yms/ctn-apply/${type === 'add' ? 'appCheck' : 'updateCheck'}`, {
     method: 'POST',
     loadingText: '正在保存...',
@@ -14,8 +14,8 @@ export async function postExamine<T>(body:PostAndPutModel, type:string = 'add') 
   });
 }
 export async function queryRateByCtnOwner<T>(params:GetRateParams) {
-  return request<T>(`/bms/fee-shipowner-rate/getList?${stringify(params)}`, { onlyData: true });
+  return request<T>(`/bms/fee-shipowner-rate/checkGetList?${stringify(params)}`, { onlyData: true });
 }
 export async function queryApplyByCtnNo<T>(ctnNo: string) {
-  return request<T>(`/yms/ctn-apply/getApply?ctnNo=${ctnNo}`, { onlyData: true });
+  return request<T>(`/yms/ctn-apply/checkGetByCtnNo?ctnNo=${ctnNo}`, { onlyData: true });
 }

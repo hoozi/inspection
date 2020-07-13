@@ -1,5 +1,5 @@
 import { StackActions, CommonActions } from '@react-navigation/native';
-import { ModelReducers, ModelEffects } from '@rematch/core';
+import { ModelReducers, ModelEffects, RematchDispatch, Models } from '@rematch/core';
 import { navigate, navigationDispatch } from '../../navigation';
 import { queryToken, queryCurrentUser } from '../../api/user';
 import { setToken, removeToken } from '../../shared/token';
@@ -57,7 +57,7 @@ const reducers:ModelReducers<Partial<User>> = {
     return Object.assign({}, state, payload)
   }
 }
-const effects:ModelEffects<RootState> = {
+const effects = (dispatch:RematchDispatch<Models>):ModelEffects<RootState> => ({
   async login(payload:LoginPayload) {
     const { callback, ...restPayload } = payload;
     const randomStr = Number(Date.now());
@@ -76,6 +76,7 @@ const effects:ModelEffects<RootState> = {
     const token = await queryToken<UserToken>(params);
     if(token) {
       await setToken(token.access_token);
+      dispatch.inspection.reset();
       callback && callback(token.access_token);
     }
   },
@@ -87,6 +88,7 @@ const effects:ModelEffects<RootState> = {
   },
   async logout() {
     await removeToken();
+    dispatch.common.resetRemoteData();
     navigationDispatch(state =>{ 
       const index:number = state.routes.findIndex(route => route.name === 'Login');
       if(index === -1) {
@@ -96,7 +98,7 @@ const effects:ModelEffects<RootState> = {
       }
     })
   }
-}
+})
 
 export default {
   state,

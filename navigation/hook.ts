@@ -5,23 +5,18 @@ import { getToken } from '../shared/token';
 
 export default function useCheckToken(...dependencies:any[]):Array<any> {
   const [appToken, forceNavigationUpdate] = React.useState<string | null>(`${Date.now()}`);
-  const { common,user } = useDispatch<RematchDispatch<Models>>();
-  const checkTokenCallBack = React.useCallback(() => {
+  const { user } = useDispatch<RematchDispatch<Models>>();
+  React.useEffect(() => {
     async function checkToken(){
       try {
         const tokenFromStorage = await getToken();
         if(tokenFromStorage) {
-          common.fetchDirByType('CTN_OWNER');
-          common.fetchDirForCtnSizeType();
           user.fetchCurrentUser();
         }
-        if(appToken !== tokenFromStorage) {
-          forceNavigationUpdate(tokenFromStorage);
-        }
+        forceNavigationUpdate(tokenFromStorage);
       } catch(e) {}
     }
     checkToken();
-  }, [getToken, forceNavigationUpdate, ...dependencies]);
-  checkTokenCallBack();
+  }, [getToken, appToken, forceNavigationUpdate, ...dependencies]);
   return [appToken, forceNavigationUpdate]
 }

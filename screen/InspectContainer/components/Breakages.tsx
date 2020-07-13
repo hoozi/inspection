@@ -3,17 +3,22 @@ import {
   View,
   Text,
   TouchableHighlight,
-  TouchableOpacity
+  TouchableOpacity,
+  ImageURISource,
 } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import FastImage, { Source } from 'react-native-fast-image';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { RematchDispatch, Models } from '@rematch/core';
 import { Picker, ActivityIndicator } from '@ant-design/react-native';
+import { ScreenNavigationProp,ScreenRouteProp } from '../../../interface';
+import { AppContext, AppContextProps } from '../../../navigation';
 import Price from '../../../components/Price';
 import CaiNiao from '../../../icon/CaiNiao';
 import { color } from '../../../constants';
 import { RootState } from '../../../store';
 import { Breakage } from '../../../store/models/inspection';
+import { SERVICE_URL } from '../../../constants';
 import ImageGrid from './ImageGrid';
 import styles from './style';
 
@@ -33,8 +38,10 @@ const BreakageCard:React.FC<BreakageCardProps> = ({
   photoTotal=3
 }) => {
   const { uploadings } = useSelector((state:RootState) => state.common);
-  const { navigate } = useNavigation();
-  const photosLength:number = data._photos.length;
+  const { appToken } = React.useContext<AppContextProps>(AppContext);
+  const { navigate } = useNavigation<ScreenNavigationProp<'Camera'>>();
+  const photos:Array<string> = data._photos;
+  const photosLength:number = photos.length;
   return (
     <View style={styles.breakageCard}>
       <View style={styles.breakageCardHeader}>
@@ -72,7 +79,27 @@ const BreakageCard:React.FC<BreakageCardProps> = ({
       <View style={styles.breakageCardBody}>
         <View style={{flexDirection: 'row'}}>
           {
-            data._photos.map(uri => <ImageGrid key={uri} source={{uri}} uploading={uploadings[uri]}/>)
+            photos.map(uri => {
+              const source:Source = 
+              uri.indexOf('file://') > -1 ? 
+              { uri } : 
+              {
+                uri: `${SERVICE_URL}/yms/ctn-repair/getFile/${uri}`,
+                headers: {
+                  Authorization: `Bearer ${appToken}`
+                }
+              }
+              return (
+                <ImageGrid 
+                  key={uri} 
+                  source={source} 
+                  parentId={data.id} 
+                  uploading={uploadings[uri]}
+                  onLoadStart={() => console.log('start--->',uri)}
+                  onLoadEnd={() => console.log('end--->', uri)}
+                />
+              )
+            })
           }
           {
             photosLength < photoTotal &&
@@ -111,6 +138,7 @@ export default ():React.ReactElement => {
       length: 0,
       width: 0,
       customerRate: 0,
+      raTiCustomerRate: 0,
       photos: [],
       _photos: []
     }
@@ -140,6 +168,7 @@ export default ():React.ReactElement => {
       changedBreakageFields[name] = values[index]
     });
     changedBreakageFields['customerRate'] = currentRate['customerRate'];
+    changedBreakageFields['raTiCustomerRate'] = currentRate['raTiCustomerRate'];
     inspection.updateBreakages({
       breakage: {
         ...oldBreakage,

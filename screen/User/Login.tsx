@@ -4,7 +4,9 @@ import {
   SafeAreaView,
   TextInput,
   Text,
-  TextInputProps
+  TextInputProps,
+  Image,
+  ImageBackground
 } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { RematchDispatch, Models } from '@rematch/core';
@@ -12,9 +14,11 @@ import { Button } from '@ant-design/react-native';
 import Form, { Field, useForm } from 'rc-field-form';
 import { InternalFieldProps } from 'rc-field-form/es/Field';
 import WhenFocusStatusBar from '../../components/WhenFocusStatusBar';
+import CaiNiao from '../../icon/CaiNiao';
 import { AppContext, AppContextProps } from '../../navigation';
 import { hasError } from '../../shared/utils';
 import { color } from '../../constants';
+import styles from './style';
 
 interface InputProps {
   name: string;
@@ -25,8 +29,8 @@ interface InputProps {
 
 interface LoginItemProps {
   data: InputProps;
+  onFocusStateChange:(name:string, type:string) => void;
   onChange?: (value: string) => void;
-  value?: string;
 }
 
 const inputPropsMap: InputProps[] = [
@@ -65,29 +69,54 @@ const inputPropsMap: InputProps[] = [
 ]
 
 const LoginItem:React.FC<LoginItemProps> = (props) => {
-  const { data, onChange } = props;
+  const { data, onChange, onFocusStateChange } = props;
+  const [ visible, setVisible ] = React.useState<boolean>(false);
+  const textInputRef = React.useRef<any>();
+  const handleToggleVisible = React.useCallback(() => {
+    data.name==='password' && textInputRef.current.blur();
+    setVisible(!visible);
+  },[visible,textInputRef]);
   const input = React.useMemo(() => (
-    <TextInput
-      //style={styles.textInput}
-      onChangeText={onChange}
-      secureTextEntry={data.name==='password'} 
-      underlineColorAndroid='transparent'
-      placeholderTextColor='#999'
-      returnKeyLabel='确定'
-      returnKeyType='done'
-      {...data.props}
-    />
+    <>
+      <TextInput
+        ref={textInputRef}
+        style={styles.textInput}
+        onChangeText={onChange}
+        secureTextEntry={data.name==='password' && !visible} 
+        underlineColorAndroid='transparent'
+        placeholderTextColor='#c8c8c8'
+        returnKeyLabel='确定'
+        returnKeyType='done'
+        onFocus={() => onFocusStateChange(data.name, 'focus')}
+        onBlur={() => onFocusStateChange(data.name, 'blur')}
+        {...data.props}
+      />
+      {
+        data.name==='password' && 
+        <CaiNiao name={visible ? 'xianshikejian' : 'yincangbukejian'} color='#999' size={22} onPress={handleToggleVisible}/>
+      }
+    </>
   ), 
-  [data])
+  [data,visible])
   return input
 };
 
+type Focuses = {
+  [key: string]: boolean;
+}
+
+const focuses:Focuses = {
+  'username': false, 
+  'password': false
+}
+
 export default ():React.ReactElement => {
   const { user } = useDispatch<RematchDispatch<Models>>();
+  const [isFocuses, setFocuses] = React.useState<Focuses>(focuses)
   const { forceNavigationUpdate } = React.useContext<AppContextProps>(AppContext);
   const [ form ] = useForm();
   const { validateFields, getFieldsError, isFieldsTouched } = form;
-  const handleLoginSubmit = async () => {
+  const handleLoginSubmit = React.useCallback(async () => {
     try {
       const values = await validateFields();
       user.login({
@@ -98,32 +127,58 @@ export default ():React.ReactElement => {
       });
       //user.login()
     } catch(e) {}
-  }
+  }, [user]);
+  const handleFocusChange = React.useCallback((name, type) => {
+    const newIsFocuses = {...isFocuses}
+    newIsFocuses[name] = type === 'focus';
+    setFocuses(newIsFocuses);
+  }, [isFocuses, setFocuses]);
   return (
-    <SafeAreaView style={{flex:1, backgroundColor: color.fillColor}}>
-      <WhenFocusStatusBar barStyle='dark-content' backgroundColor={color.fillColor}/>
-      <Form
-        form={form}
-        component={false}
-      >
-        {
-          inputPropsMap.map(prop => (
-            <Field name={prop.name} key={prop.name} {...prop.options}>
-              <LoginItem data={prop}/>
+    <SafeAreaView style={styles.container}>
+      <WhenFocusStatusBar barStyle='dark-content' backgroundColor='#fbfcfd' hidden/>
+      <ImageBackground source={require('../../static/lg.png')} resizeMethod='resize' style={{flex:1}}>
+        <View style={styles.loginForm}>
+          <View style={styles.appIconContainer}>
+            <Image source={require('../../static/appIcon.png')} resizeMethod='resize' style={styles.appIcon}/>
+          </View>
+          <Text style={styles.loginTitle}>账号登录</Text>
+          <Form
+            form={form}
+            component={false}
+          >
+            {
+              inputPropsMap.map(prop => (
+                <View key={prop.name} style={{
+                  ...styles.loginItem, 
+                  ...(isFocuses[prop.name] ? 
+                    {
+                      borderBottomColor: color.textBaseColor 
+                    } : {}) 
+                  }}>
+                  <CaiNiao name={prop.icon} size={20} color={isFocuses[prop.name] ? color.textBaseColor : '#c8c8c8'}/>
+                  <Field name={prop.name} key={prop.name} {...prop.options}>
+                    <LoginItem data={prop} onFocusStateChange={handleFocusChange}/>
+                  </Field>
+                </View>
+              ))
+            }
+            <Field shouldUpdate>
+              {
+                () => (
+                  <Button disabled={ 
+                      !isFieldsTouched(true) ||
+                      hasError(getFieldsError())
+                    } 
+                    type='primary' 
+                    onPress={handleLoginSubmit}
+                    style={styles.loginButton}
+                  >登 录</Button>
+                )
+              }
             </Field>
-          ))
-        }
-        <Field shouldUpdate>
-          {
-            () => (
-              <Button disabled={ 
-                !isFieldsTouched(true) ||
-                hasError(getFieldsError())
-              } type='primary' onPress={handleLoginSubmit}>登 录</Button>
-            )
-          }
-        </Field>
-      </Form>
+          </Form>
+        </View>
+      </ImageBackground>
     </SafeAreaView>
   )
 }

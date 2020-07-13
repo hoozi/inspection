@@ -6,6 +6,7 @@ import {
   Picker,
   Switch
 } from '@ant-design/react-native';
+import Entypo from 'react-native-vector-icons/Entypo';
 import { ListItemProps } from '@ant-design/react-native/lib/list/ListItem';
 import { InputItemProps } from '@ant-design/react-native/lib/input-item';
 import { PickerProps } from '@ant-design/react-native/lib/picker';
@@ -60,7 +61,7 @@ const createFormItem = ({
   ctnSizeTypeExtra
 }:PropsFromParent):Array<FormItem> => (
   [
-    {
+    /* {
       name: 'eir',
       title: 'EIR',
       component: InputItem,
@@ -73,7 +74,7 @@ const createFormItem = ({
         },
         extra: eirExtra
       }
-    },
+    }, */
     {
       name: 'ctnNo',
       title: '箱号',
@@ -81,7 +82,7 @@ const createFormItem = ({
       isField,
       componentProps:{
         ...InputItemBaseProps,
-        placeholder: '请输入,不区分大小写',
+        placeholder: '请输入',
         returnKeyType: 'search',
         onSubmitEditing: e => {
           onSearchApply(e.nativeEvent.text)
@@ -99,7 +100,7 @@ const createFormItem = ({
     {
       name: 'ctnOwner',
       title: (
-        <List.Item>
+        <List.Item arrow={<Entypo name='chevron-thin-right' color='#999' size={14} style={{paddingLeft: 2}}/>}>
           <Text style={commonStyles.fieldName}>箱主</Text>
         </List.Item>
       ),
@@ -119,7 +120,7 @@ const createFormItem = ({
     {
       name: 'ctnSizeType',
       title: (
-        <List.Item>
+        <List.Item arrow={<Entypo name='chevron-thin-right' color='#999' size={14} style={{paddingLeft: 2}}/>}>
           <Text style={commonStyles.fieldName}>箱型尺寸</Text>
         </List.Item>
       ),

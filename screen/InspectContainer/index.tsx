@@ -4,14 +4,29 @@ import {
   SafeAreaView,
   Text
 } from 'react-native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useDispatch } from 'react-redux';
+import { RematchDispatch, Models } from '@rematch/core';
 import WhenFocusStatusBar from '../../components/WhenFocusStatusBar';
 import InspectContainerForm from './components/Form';
 import { PostAndPutModel } from '../../store/models/inspection';
+import { ScreenNavigationProp, ScreenRouteProp } from 'interface';
 
 export default ():React.ReactElement => {
-  const handleSaveInspection = (values:PostAndPutModel) => {
-    console.log(values.ctnRepairParamsList[0]._photos,values.ctnRepairParamsList[0].photos)
-  }
+  const { inspection } = useDispatch<RematchDispatch<Models>>();
+  const { goBack } = useNavigation<ScreenNavigationProp<'EditInspectContainer'>>();
+  const { params } = useRoute<ScreenRouteProp<'EditInspectContainer'>>();
+  const type = params?.type;
+  const handleSaveInspection = React.useCallback((values:PostAndPutModel, reset) => {
+    inspection.postInspection({
+      ...values,
+      type,
+      callback() {
+        reset();
+        type === 'put' && goBack();
+      }
+    })
+  },[inspection])
   return (
     <SafeAreaView style={{flex:1}}>
       <WhenFocusStatusBar/>

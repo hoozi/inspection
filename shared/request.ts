@@ -44,8 +44,6 @@ const codeMessage:ICodeMessage = {
   '999': '未知错误'
 };
 
-let TIMES:number = 0;
-
 function checkStatus(response: Response): Response {
   if (response.status >= 200 && response.status < 300) {
     return response;

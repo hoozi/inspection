@@ -13,7 +13,7 @@ export type RootParamList = {
   Login: undefined;
   EditInspectContainer: { type: 'put' };
   Logout: undefined;
-  Camera: undefined;
+  Camera: { breakageId?: number };
   CheckLogin: undefined;
 }
 
@@ -60,7 +60,10 @@ const authorityConfig:Array<Config> = [
     key: 'EditInspectContainer',
     component: InspectContainer,
     initialParams: { type: 'put' },
-    isTab: false
+    isTab: false,
+    options: {
+      title: '验箱修改'
+    }
   },
   {
     name: 'Camera',

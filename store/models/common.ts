@@ -49,6 +49,12 @@ const reducers:ModelReducers<Common> = {
   save(state, payload) {
     return Object.assign({},state, payload);
   },
+  resetRemoteData() {
+    return Object.assign({},state, {
+      ctnOwner: [],
+      ctnSizeType: []
+    });
+  },
   saveUploadings(state, payload) {
     const { id, uploading } = payload;
     const uploadings = copy<UploadingData>(state.uploadings);
@@ -80,17 +86,16 @@ const effects = (dispatch:RematchDispatch<Models>):ModelEffects<RootState> => ({
     dispatch.inspection.updatePhotos({
       id,
       photo: uri
-    })
+    });
     const response = await uploadImage<Array<string>>(formData);
-    if(response) {
+    if(response && response.length) {
       this.saveUploadings({
         id:uri,
         uploading: false
       });
       dispatch.inspection.updatePhotos({
         id,
-        photo: response[0],
-        local: false
+        photo: response[0]
       })
       /* dispatch.examine.changeBreakage({
         index,
@@ -102,8 +107,19 @@ const effects = (dispatch:RematchDispatch<Models>):ModelEffects<RootState> => ({
     const response = await downloadImage<string>(name);
     return response
   },
-  async deleteImage(name: string) {
-    await deleteImage<string>(name);
+  async deleteImage(payload, rootState) {
+    const { ctnRepairParamsList } = rootState.inspection
+    const { photo, id } = payload;
+    const name:string = photo.indexOf('file://') > -1 ? '_photos' : 'photos'
+    const current = ctnRepairParamsList.filter(item => item.id === id)[0];
+    const index:number = current[name].findIndex((item:string) => item === photo);
+    const deletePhoto:string = current['photos'][index];
+    dispatch.inspection.updatePhotos({
+      id,
+      photo,
+      type: 'delete'
+    });
+    await deleteImage<string>(deletePhoto);
   }
 })
 

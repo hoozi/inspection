@@ -118,21 +118,27 @@ export default StyleSheet.create<IExaminationFormStyle>({
   breakageImageContainer: {
     ...imageStyle,
     marginRight: 12,
-    
+    backgroundColor: '#f5f5f5'
   },
   breakageImage: {
     ...imageStyle
   },
   deleteImage: {
-    width: 20,
-    height: 20,
-    borderRadius: 100,
-    backgroundColor: '#ff5b05',
-    justifyContent: 'center',
+    width: 16,
+    height: 16,
+    paddingLeft: 2,
+    paddingTop: 2,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 0,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 4,
+    backgroundColor: color.importantColor,
+    //justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',
-    top: -8,
-    right: -8
+    top: 0,
+    right: 0,
+    zIndex: 11
   },
   breakageCardFooter: {
     ...border(`${StyleSheet.hairlineWidth} 0 0 0`),
@@ -148,7 +154,7 @@ export default StyleSheet.create<IExaminationFormStyle>({
     marginLeft: 8
   },
   maskUploading: {
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     zIndex: 10,
     borderRadius: 4,
     justifyContent: 'center',

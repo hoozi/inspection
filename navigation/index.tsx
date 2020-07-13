@@ -38,19 +38,21 @@ const Main:React.FC<any> = () => (
 )
 
 export interface AppContextProps {
-  forceNavigationUpdate: React.Dispatch<string | null>
+  forceNavigationUpdate: React.Dispatch<string | null>;
+  appToken: string;
 }
 
 export const AppContext = React.createContext<AppContextProps>({
-  forceNavigationUpdate: () => {}
+  forceNavigationUpdate: () => {},
+  appToken: ''
 });
 
 const AppNavigation:React.FC<any> = () => {
   const [appToken, forceNavigationUpdate] = useCheckToken();
   return (
-    <AppContext.Provider value={{forceNavigationUpdate}}>
+    <AppContext.Provider value={{appToken, forceNavigationUpdate}}>
       <NavigationContainer ref={navigationRef}>
-        <Stack.Navigator {...defaultStackProps}>
+        <Stack.Navigator initialRouteName='Main' {...defaultStackProps}>
           {
             appToken ? 
             <>

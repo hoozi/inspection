@@ -1,8 +1,8 @@
 import { ModelEffects, ModelReducers } from '@rematch/core';
 import groupBy from 'lodash/groupBy';
 import unionBy from 'lodash/unionBy';
-import { queryApplyByCtnNo, queryRateByCtnOwner, postExamine } from '../../api/inspection';
-import { copy } from '../../shared/utils';
+import { queryApplyByCtnNo, queryRateByCtnOwner, postInspection } from '../../api/inspection';
+import { copy, getFileName } from '../../shared/utils';
 import { Toast } from '@ant-design/react-native';
 import { RootState } from '../index';
 
@@ -54,8 +54,10 @@ export interface Breakage {
   length: number;
   width:number;
   customerRate:number;
+  raTiCustomerRate: number;
   photos: Array<string>;
   _photos: Array<string>;
+  //allPhotos: Array<string>;
   [key:string]: any;
 }
 
@@ -99,7 +101,7 @@ export const reducers:ModelReducers<Inspection> = {
     return Object.assign({}, state, initialCtnApply)
   },
   computedFee(state) {
-    const repairFee = state.ctnRepairParamsList.reduce((sum, cur) => sum+cur.customerRate, 0);
+    const repairFee = state.ctnRepairParamsList.reduce((sum, cur) => sum+cur.raTiCustomerRate, 0);
     return Object.assign({}, state, {
       ctnApply: {
         ...state.ctnApply,
@@ -122,30 +124,41 @@ export const reducers:ModelReducers<Inspection> = {
     }
     return Object.assign({}, state, {
       ctnRepairParamsList: [...newCtnRepairParamsList]
-    })
+    });
   },
   updatePhotos(state, payload) {
-    const { id, photo, type = 'add', local=true } = payload;
+    const { id, photo, type = 'add' } = payload;
+    const photoType:string = photo.indexOf('file://') > -1 ? '_photos' : 'photos';
     const newCtnRepairParamsList = [...state.ctnRepairParamsList];
-    const lIndex = newCtnRepairParamsList.findIndex(breakage => id === breakage.id);
-    const currentCtnRepairParamsList = newCtnRepairParamsList.filter(item => item.id === id)[0];
-    const newPhotos = [...currentCtnRepairParamsList[local?'_photos':'photos']];
-    const pIndex = newPhotos.findIndex(item => item === photo);
+    const breakageIndex = newCtnRepairParamsList.findIndex(breakage => id === breakage.id);
+    const currentCtnRepairParams = newCtnRepairParamsList.filter(item => item.id === id)[0];
+    const allPhotos = {
+      photos: [...currentCtnRepairParams.photos],
+      _photos: [...currentCtnRepairParams._photos]
+    } as {
+      [key: string]: Array<string>
+    }
+    
     if(type === 'add') {
-      newPhotos.push(photo);
+      allPhotos[photoType].push(photo)
     } else {
-      newPhotos.splice(pIndex, 1);
+      const index:number = allPhotos[photoType].findIndex(item => getFileName(item) === getFileName(photo));
+      if(index > -1) {
+        allPhotos['photos'].splice(index,1);
+        allPhotos['_photos'].splice(index,1);
+      }
     }
-    const changedCtnRepairParamsList = {
-      ...currentCtnRepairParamsList,
-      [`${local?'_photos':'photos'}`]: newPhotos
-    }
-    newCtnRepairParamsList.splice(lIndex, 1, changedCtnRepairParamsList);
+    newCtnRepairParamsList.splice(breakageIndex, 1, {
+      ...currentCtnRepairParams,
+      photos: [...allPhotos['photos']],
+      _photos: [...allPhotos['_photos']]
+    });
     return Object.assign({}, state, {
       ctnRepairParamsList: newCtnRepairParamsList
     })
   }
 }
+
 const effects:ModelEffects<RootState> = {
   async fetchApplyByCtnNo(ctnNo) {
     const response = await queryApplyByCtnNo<CtnApply>(ctnNo);
@@ -156,7 +169,8 @@ const effects:ModelEffects<RootState> = {
       }
     }
   },
-  async fetchRateByCtnOwner(shipownerCode:string) {
+  async fetchRateByCtnOwner(payload) {
+    const { callback, shipownerCode } = payload;
     const response = await queryRateByCtnOwner<Breakage[]>({shipownerCode});
     let treeRate: Array<Rate> = [];
     if(response && response.length) {
@@ -184,12 +198,13 @@ const effects:ModelEffects<RootState> = {
         }
       }
     }
+    callback && callback(response as Breakage[]);
     this.save({treeRate, rate:response})
   },
-  async postExamine(payload:PostAndPutModelPayload) {
-    const { callback, type='add', ...restPayload } = payload
-    const response = await postExamine<any>(restPayload, type);
-    if(response.code===0) {
+  async postInspection(payload:PostAndPutModelPayload) {
+    const { callback, type='add', ...restPayload } = payload;
+    const response = await postInspection<any>(restPayload, type);
+    if(response && response.code===0) {
       Toast.success('保存成功',3,() => {
         callback && callback()
       })

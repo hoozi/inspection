@@ -14,6 +14,7 @@ const fields: Array<string> = [
   'normalFlag'
 ]
 
+
 export const createFields = (data:CtnApply):Array<FieldData> => {
   const returnFields: Array<FieldData> = [];
   Object.keys(data).forEach(key => {
@@ -21,7 +22,8 @@ export const createFields = (data:CtnApply):Array<FieldData> => {
     const transformFields:TransformFields = {
       ctnOwner: typeof data[key] === 'string' ? [data[key]] : data[key],
       ctnSizeType: typeof data[key] === 'string' ? [data[key]] : data[key],
-      normalFlag: typeof data[key] === 'string' ? data[key] === 'N' : data[key]
+      normalFlag: typeof data[key] === 'string' ? data[key] === 'N' : data[key],
+      ctnNo: typeof data[key] === 'string' ? data[key].toLocaleUpperCase() : data[key]
     }
     const field = {
       name: key,
@@ -34,6 +36,7 @@ export const createFields = (data:CtnApply):Array<FieldData> => {
 
 export const transformPostData = (data:CtnApply):CtnApply => {
   Object.keys(data).forEach(key => {
+    if(!fields.includes(key)) return;
     const transformFields:TransformFields = {
       ctnOwner: data[key][0],
       ctnSizeType: data[key][0],
