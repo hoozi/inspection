@@ -5,9 +5,9 @@ import {
 import { ActivityIndicator } from '@ant-design/react-native';
 import { ActivityIndicatorNativeProps } from '@ant-design/react-native/lib/activity-indicator';
 
-interface ILoadingProps extends ActivityIndicatorNativeProps {}
+interface LoadingProps extends ActivityIndicatorNativeProps {}
 
-export default (props:ILoadingProps):React.ReactElement => {
+export default (props:LoadingProps):React.ReactElement => {
   return (
     <View style={{flex:1, justifyContent: 'center', alignItems: 'center'}}>
       <ActivityIndicator {...props}/>

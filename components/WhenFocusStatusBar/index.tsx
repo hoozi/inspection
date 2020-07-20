@@ -6,5 +6,5 @@ import { color } from '../../constants';
 export default function WhenFocusStatusBar(props:StatusBarProps):React.ReactElement | null {
   const { backgroundColor=color.brandColor, barStyle='light-content', ...restProps} = props;
   const isFocused = useIsFocused();
-  return isFocused ? <StatusBar backgroundColor={backgroundColor} barStyle={barStyle}  {...restProps} /> : null;;
+  return isFocused ? <StatusBar backgroundColor={backgroundColor} barStyle={barStyle}  {...restProps} /> : null;
 }

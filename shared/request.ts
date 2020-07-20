@@ -1,11 +1,9 @@
 import { Toast, Portal } from '@ant-design/react-native';
 import { getToken } from './token';
 import { SERVICE_URL } from '../constants';
-import { navigationDispatch } from '../navigation';
 import store from '../store';
-import { StackActions,CommonActions } from '@react-navigation/native';
 
-interface ICodeMessage {
+interface CodeMessage {
   [code: string]: string;
 }
 
@@ -30,7 +28,7 @@ export type ResultData<T> =
 
 export type Options = RequestInit & ApiOptions;
 
-const codeMessage:ICodeMessage = {
+const codeMessage:CodeMessage = {
   '200': '操作成功',
   '401': '用户没有权限',
   '403': '访问被禁止',

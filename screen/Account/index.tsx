@@ -40,7 +40,7 @@ export default () => {
         <Text style={styles.accountTitle}>你好，{sysUser.username}</Text>
       </View>
       <List>
-        <List.Item thumb={<Entypo name='mobile' size={16} color={color.warningColor}/>} extra={sysUser.phone}>
+        <List.Item thumb={<Entypo name='mobile' size={16} color={color.warningColor}/>} extra={<Text style={{fontSize: 15, color: '#888'}}>{sysUser.phone}</Text>}>
           <Text style={{fontSize: 15, paddingLeft:4}}>手机号</Text>
         </List.Item>
       </List>

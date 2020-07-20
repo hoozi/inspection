@@ -81,6 +81,7 @@ export default ({
         ...ctnApply,
         ...values
       })
+      //console.log(newCtnApply)
       onSave && onSave({
         ctnApply: newCtnApply,
         ctnRepairParamsList
@@ -108,7 +109,9 @@ export default ({
   ),[eirSearching]);
   
   const handleSearchApply = React.useCallback((ctnNo:string):void => {
-    inspection.fetchApplyByCtnNo(ctnNo);
+    if(ctnNo) {
+      inspection.fetchApplyByCtnNo(ctnNo);
+    }
   },[inspection]);
   const ctnNoExtra = React.useMemo<React.ReactNode>(() => (
     applySearching ? 
@@ -129,7 +132,7 @@ export default ({
       callback(data:Breakage[]) {
         const { customerBrief } = ctnOwner.filter(item => item.customerCode === shipownerCodeValue)[0];
         if(!data.length) {
-          Toast.info(`没有找到${customerBrief}的修箱费率`, 2, () => null, false)
+          Toast.info(`没有找到${customerBrief}的修箱费率`, 3, () => null, false)
         }
       }
     });
